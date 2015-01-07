@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="utils.js" type="text/javascript"></script>
+    <script src="snake.js" type="text/javascript"></script>
+    <script src="draw.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    var game = null, FPS = 30, TURN_TIME = 300,
+        update_clock = null, draw_clock = null;
+
+    window.requestAnimFrame = (function(){
+        return  window.requestAnimationFrame       ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame    ||
+                window.oRequestAnimationFrame      ||
+                window.msRequestAnimationFrame     ||
+                function( callback ){
+                    window.setTimeout(callback, 1000 / FPS);
+                };
+    })();
+    window.cancelRequestAnimFrame = ( function() {
+        return window.cancelAnimationFrame                  ||
+               window.webkitCancelRequestAnimationFrame    ||
+               window.mozCancelRequestAnimationFrame       ||
+               window.oCancelRequestAnimationFrame         ||
+               window.msCancelRequestAnimationFrame        ||
+               clearTimeout
+    } )();
+
+    function animation () {
+        draw_clock = requestAnimationFrame(animation);
+        game.draw();
+    }
+
+    function update () {
+        update_clock = setTimeout(update, TURN_TIME);
+        this.game.update();
+    }
+
+    function init () {
+        game = new SnakeSystem('draw-field', new Coord(50, 50));
+        update();
+        animation();
+    }
+
+    window.onkeydown = function(e) {
+        e = e || window.event;
+        // 37 is left arrow
+        game.board.snake.turn(e.keyCode - 37);
+    }
+
+    </script>
+</head>
+<body onload="javascript:init()">
+    <canvas id="draw-field" style="border: 1px solid black;"></canvas>       
+</body>
+</html>
