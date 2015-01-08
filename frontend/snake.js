@@ -6,31 +6,33 @@ function Snake (position, dir) {
 }
 
 Snake.prototype.turn = function(dir) {
-    // opposite of current direction?
-    if (Math.abs(dir - this._dir) !== 2) {
-        this._dir = dir;
+    if (this.parts.length > 1 && coord_eq(this.head().add(this._get_coord_at_dir(dir)), this.parts[1])) {
+        return;
     }
+    this._dir = dir;
+}
+
+Snake.prototype._get_coord_at_dir = function(dir) {
+    var coord = new Coord(0, 0);
+    switch(dir) {
+        case DIRECTION.UP:
+            coord.y = -1;
+            break;
+        case DIRECTION.DOWN:
+            coord.y = 1;
+            break;
+        case DIRECTION.LEFT:
+            coord.x = -1;
+            break;
+        case DIRECTION.RIGHT:
+            coord.x = 1;
+            break;
+    }
+    return coord;
 }
 
 Snake.prototype.update = function() {
-    var newHead = this.parts[0].clone();
-
-    switch(this._dir) {
-        case DIRECTION.UP:
-            newHead.y -= 1;
-            break;
-        case DIRECTION.DOWN:
-            newHead.y += 1;
-            break;
-        case DIRECTION.LEFT:
-            newHead.x -= 1;
-            break;
-        case DIRECTION.RIGHT:
-            newHead.x += 1;
-            break;
-        default:
-            return;
-    }
+    var newHead = this.parts[0].clone().add(this._get_coord_at_dir(this._dir));
 
     for(var c = this.parts.length - 1; c > 0; --c) {
         this.parts[c] = this.parts[c - 1];

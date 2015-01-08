@@ -14,6 +14,12 @@ Coord.prototype.clone = function() {
     return new Coord(this.x, this.y);
 }
 
+Coord.prototype.add = function(coord) {
+    this.x += coord.x
+    this.y += coord.y;
+    return this;
+}
+
 function coord_eq(left, right) {
     return left.x === right.x && left.y === right.y;
 }
