@@ -1,4 +1,4 @@
-function SnakeSystem (canvas_id, size) {
+function DrawSystem (canvas_id, size) {
     this.canvas = document.getElementById(canvas_id);
 
     var width = document.body.clientWidth;
@@ -20,11 +20,11 @@ function SnakeSystem (canvas_id, size) {
     this.board.spawn_food();
 }
 
-SnakeSystem.prototype.update = function() {
+DrawSystem.prototype.update = function() {
     this.board.update();
 }
 
-SnakeSystem.prototype.draw = function() {
+DrawSystem.prototype.draw = function() {
     var rect = null;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -36,15 +36,15 @@ SnakeSystem.prototype.draw = function() {
 
     this.ctx.fillStyle = "#000000";
     if (this.board.snake !== null) {
-        for(var c = 0; c < this.board.snake.parts.length; ++c) {
-            rect = this._coord_to_rect(this.board.snake.parts[c]);
+        this.board.snake.parts.forEach(function draw_snake_parts(part) {
+            rect = this._coord_to_rect(part);
             this.ctx.fillRect(rect[0].x, rect[0].y, rect[1].x, rect[1].y);
-        }
+        }, this);
     }
 
     this.ctx.stroke();
 }
 
-SnakeSystem.prototype._coord_to_rect = function(coord) {
+DrawSystem.prototype._coord_to_rect = function(coord) {
     return [new Coord(coord.x * this.cell_size.x, coord.y * this.cell_size.y), this.cell_size.clone()];
 }

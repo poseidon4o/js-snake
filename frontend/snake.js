@@ -79,7 +79,7 @@ SnakeBoard.prototype.spawn_snake = function(position) {
 SnakeBoard.prototype.spawn_food = function() {
     do {
         this.food = new Coord(parseInt(random(0, this._size.x), 10),
-                               parseInt(random(0, this._size.y), 10));
+                              parseInt(random(0, this._size.y), 10));
     } while(this.snake.at_position(this.food));
     
 }
