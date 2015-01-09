@@ -6,8 +6,8 @@ var DIRECTION = {
 }
 
 function Coord (x, y) {
-    this.x = parseInt(x, 10);
-    this.y = parseInt(y, 10);
+    this.x = x !== undefined ? parseInt(x, 10) : 0;
+    this.y = y !== undefined ? parseInt(y, 10) : 0;
 }
 
 Coord.prototype.clone = function() {

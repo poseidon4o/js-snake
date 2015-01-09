@@ -5,6 +5,15 @@ function Snake (position, dir) {
     this._dir = dir || DIRECTION.UP;
 }
 
+Snake.prototype.from_json = function(json) {
+    this._dir = json._dir;
+    this.parts = [];
+    json.parts.forEach(function json_to_snake(part) {
+        this.parts.push(new Coord(part.x, part.y));
+    }, this);
+    return this;
+}
+
 Snake.prototype.turn = function(dir) {
     if (this.parts.length > 1 && coord_eq(this.head().add(this._get_coord_at_dir(dir)), this.parts[1])) {
         return;
@@ -66,10 +75,21 @@ Snake.prototype.at_position = function(pos) {
 }
 
 
+
+
+
+
 function SnakeBoard (size) {
     this._size = size;
     this.food = null;
     this.snake = null;
+}
+
+SnakeBoard.prototype.from_json = function(json) {
+    this._size = new Coord(json._size.x, json._size.y);
+    this.snake = (this.snake === null ? new Snake() : this.snake).from_json(json.snake);
+    this.food = json.food !== null ? new Coord(json.food.x, json.food.y) : null;
+    return this;
 }
 
 SnakeBoard.prototype.spawn_snake = function(position) {
