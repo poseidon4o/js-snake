@@ -24,22 +24,20 @@ io.on('connection', function (socket) {
     game.spawn_snake(new snake.Coord(size.x / 2, size.y / 2));
     game.spawn_food();
 
-    console.log(['game', game]);
+    console.log('Game created');
 
     var game_ticker = setInterval(function() {
         game.update();
         socket.emit('update', {game: game});
-        console.log('update');
     }, GAME_SPEED);
 
 
     socket.on('input', function(dir) {
-        console.log(['input', dir]);
         game.snake.turn(dir);
     });
 
     socket.on('disconnect', function() {
-        console.log('disconnect');
+        console.log('Game ended');
         clearInterval(game_ticker);
     });
 });
