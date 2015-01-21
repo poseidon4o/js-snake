@@ -1,3 +1,37 @@
+var DIRECTION = {
+    LEFT: 0,
+    UP: 1,
+    RIGHT: 2,
+    DOWN: 3
+}
+
+function Coord (x, y) {
+    this.x = x !== undefined ? parseInt(x, 10) : 0;
+    this.y = y !== undefined ? parseInt(y, 10) : 0;
+}
+
+Coord.prototype.clone = function() {
+    return new Coord(this.x, this.y);
+}
+
+Coord.prototype.add = function(coord) {
+    this.x += coord.x
+    this.y += coord.y;
+    return this;
+}
+
+function coord_eq(left, right) {
+    return left.x === right.x && left.y === right.y;
+}
+
+function random(from, to) {
+    return Math.random() * (to - from) + from;
+}
+
+
+
+
+
 
 
 function Snake (position, dir) {
@@ -120,5 +154,22 @@ SnakeBoard.prototype.update = function() {
 
     if (head.x < 0 || head.y < 0 || head.x >= this._size.x || head.y >= this._size.y) {
         this.end();
+    }
+}
+
+
+
+if(typeof window !== 'undefined'){
+    
+} else {
+    module.exports = {
+        Coord: Coord,
+        DIRECTION: DIRECTION,
+        random: random,
+        coord_eq: coord_eq,
+
+
+        Snake: Snake,
+        SnakeBoard: SnakeBoard
     }
 }
