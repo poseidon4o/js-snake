@@ -14,27 +14,86 @@ server.listen(8090);
 
 
 var GAME_SPEED = 150;
+var COLORS = ["#808080", "#000000", "#FF0000", "#800000", "#FFFF00", 
+              "#808000", "#00FF00", "#008000", "#00FFFF", "#008080",
+              "#0000FF", "#FF00FF", "#800080"];
+
 
 var game = new snake.SnakeBoard(new snake.Coord(snake.GAME_SIZE[0], snake.GAME_SIZE[1]));
 game.spawn_food();
 console.log('Game created');
 
+var clients = [];
+
+var game_ticker = setInterval(function() {
+    game.update();
+    io.sockets.emit('update', {game: game});
+}, GAME_SPEED);
+
+function update_all() {
+    io.sockets.emit('clients-update', clients);
+}
+
+
 io.on('connection', function (socket) {
-    var id = game.spawn_snake();
+    var client_id, color, name;
 
-    var game_ticker = setInterval(function() {
-        game.update();
-        socket.emit('update', {id: id, game: game});
-    }, GAME_SPEED);
+    socket.on('register', function(data) {
+        if (!COLORS.length) {
+            socket.emit('dc', "No room");
+            socket.disconnect();
+            return;
+        }
 
+        for (var c = 0; c < clients.length; ++c) {
+            if (clients[c].name === data.name) {
+                socket.emit('dc', "Name taken");
+                socket.disconnect();
+                return;
+            }
+        }
+
+
+        name = data.name;
+        client_id = game.spawn_snake();
+        color = COLORS.pop();
+        
+        clients[client_id] = {
+            id: client_id,
+            color: color,
+            name: data.name
+        };
+
+        update_all();
+        socket.emit('set-id', client_id);
+    });
 
     socket.on('input', function(dir) {
-        game.snakes[id].turn(dir);
+        for (var c = 0; c < clients.length; ++c) {
+            if (clients[c].name === name) {
+                game.snakes[clients[c].id].turn(dir);
+                break;
+            }
+        }
     });
 
     socket.on('disconnect', function() {
-        console.log('Game ended');
-        game.remove_snake(id);
-        clearInterval(game_ticker);
+        for (var c = 0; c < clients.length; ++c) {
+            if (clients[c].name === name) {
+                client_id = c;
+                break;
+            }
+        }
+
+        COLORS.push(clients[client_id].color);
+
+        for (var c = client_id + 1; c < clients.length; ++c) {
+            clients[c].id--;
+        }
+
+        clients.splice(client_id, 1);
+        game.snakes.splice(client_id, 1);
+
+        update_all();
     });
 });

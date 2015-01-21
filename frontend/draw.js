@@ -18,7 +18,7 @@ function DrawSystem (canvas_id, size) {
     this.board = new SnakeBoard(size);
 }
 
-DrawSystem.prototype.draw = function(me) {
+DrawSystem.prototype.draw = function(me, clients) {
     var rect = null;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -28,19 +28,15 @@ DrawSystem.prototype.draw = function(me) {
         this.ctx.fillRect(rect[0][0], rect[0][1], rect[1][0], rect[1][1]);
     }
 
-    this.ctx.fillStyle = "#000000";
-    if (this.board.snake !== null) {
-        this.board.snakes.forEach(function(snake, idx) {
-            if (idx == me) {
-                this.ctx.fillStyle = "#00ff00";
-            }
-            snake.parts.forEach(function draw_snake_parts(part) {
-                rect = this._coord_to_rect(part);
-                this.ctx.fillRect(rect[0][0], rect[0][1], rect[1][0], rect[1][1]);
-            }, this);
-            this.ctx.fillStyle = "#000000";
+    clients.forEach(function (client) {
+        this.ctx.fillStyle = client.color;
+    
+        this.board.snakes[client.id].parts.forEach(function draw_snake_parts(part) {
+            rect = this._coord_to_rect(part);
+            this.ctx.fillRect(rect[0][0], rect[0][1], rect[1][0], rect[1][1]);
         }, this);
-    }
+
+    }, this);
 
     this.ctx.stroke();
 }

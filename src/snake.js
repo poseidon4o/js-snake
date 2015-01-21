@@ -151,35 +151,26 @@ SnakeBoard.prototype.spawn_snake = function() {
     return this.snakes.length - 1;
 }
 
-SnakeBoard.prototype.remove_snake = function(id) {
-    this.snakes[id] = this.snakes[this.snakes.length];
-    this.snakes.pop();
-};
-
 SnakeBoard.prototype.end = function(which) {
     this.snakes[which].parts = [new Coord(this._size.x / 2, this._size.y / 2)];
 }
 
 SnakeBoard.prototype.update = function() {
-    this.snakes.forEach(function(snake, idx) {
-        snake.update();
+    for (var c = 0; c < this.snakes.length; ++c) {
+        this.snakes[c].update();
 
-        var head = snake.head();
+        var head = this.snakes[c].head();
         if (this.food !== null && coord_eq(head, this.food)) {
-            snake.grow();
+            this.snakes[c].grow();
             this.spawn_food();
-        } else if (snake.at_tail(head)) {
-            this.end(idx);
+        } else if (this.snakes[c].at_tail(head)) {
+            this.end(c);
         }
 
         if (head.x < 0 || head.y < 0 || head.x >= this._size.x || head.y >= this._size.y) {
-            this.end(idx);
+            this.end(c);
         }
-    }, this);
-
-
-
-    
+    }
 }
 
 
