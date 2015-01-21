@@ -36,7 +36,7 @@
     
     function init () {
         my_name = prompt("Enter username");
-        var socket = io.connect('http://localhost:8090/');
+        var socket = io.connect();
 
         socket.on('dc', function (error) {
             alert("Disconnected: \n" + error);
