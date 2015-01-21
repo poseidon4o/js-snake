@@ -13,31 +13,28 @@ var io = require('socket.io').listen(server);
 server.listen(8090);
 
 
-var GAME_SPEED = 100;
+var GAME_SPEED = 150;
 
-
-
+var game = new snake.SnakeBoard(new snake.Coord(snake.GAME_SIZE[0], snake.GAME_SIZE[1]));
+game.spawn_food();
+console.log('Game created');
 
 io.on('connection', function (socket) {
-    var size = new snake.Coord(50, 50);
-    var game = new snake.SnakeBoard(size);
-    game.spawn_snake(new snake.Coord(size.x / 2, size.y / 2));
-    game.spawn_food();
-
-    console.log('Game created');
+    var id = game.spawn_snake();
 
     var game_ticker = setInterval(function() {
         game.update();
-        socket.emit('update', {game: game});
+        socket.emit('update', {id: id, game: game});
     }, GAME_SPEED);
 
 
     socket.on('input', function(dir) {
-        game.snake.turn(dir);
+        game.snakes[id].turn(dir);
     });
 
     socket.on('disconnect', function() {
         console.log('Game ended');
+        game.remove_snake(id);
         clearInterval(game_ticker);
     });
 });

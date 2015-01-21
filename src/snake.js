@@ -1,3 +1,5 @@
+var GAME_SIZE = [1000/7, 100];
+
 var DIRECTION = {
     LEFT: 0,
     UP: 1,
@@ -39,13 +41,14 @@ function Snake (position, dir) {
     this._dir = dir || DIRECTION.UP;
 }
 
-Snake.prototype.from_json = function(json) {
-    this._dir = json._dir;
-    this.parts = [];
+snake_from_json = function(json) {
+    var snake = new Snake(new Coord(0, 0));
+    snake._dir = json._dir;
+    snake.parts = [];
     json.parts.forEach(function json_to_snake(part) {
-        this.parts.push(new Coord(part.x, part.y));
-    }, this);
-    return this;
+        snake.parts.push(new Coord(part.x, part.y));
+    }, snake);
+    return snake;
 }
 
 Snake.prototype.turn = function(dir) {
@@ -116,45 +119,67 @@ Snake.prototype.at_position = function(pos) {
 function SnakeBoard (size) {
     this._size = size;
     this.food = null;
-    this.snake = null;
+    this.snakes = [];
 }
 
-SnakeBoard.prototype.from_json = function(json) {
-    this._size = new Coord(json._size.x, json._size.y);
-    this.snake = (this.snake === null ? new Snake() : this.snake).from_json(json.snake);
-    this.food = json.food !== null ? new Coord(json.food.x, json.food.y) : null;
-    return this;
+snake_board_from_json = function(json) {
+    var sb = new SnakeBoard(new Coord(0, 0));
+
+    sb._size = new Coord(json._size.x, json._size.y);
+    sb.snakes = [];
+    for (var c = 0; c < json.snakes.length; ++c) {
+        sb.snakes.push(snake_from_json(json.snakes[c]));
+    }
+
+    sb.food = json.food !== null ? new Coord(json.food.x, json.food.y) : null;
+    return sb;
 }
 
-SnakeBoard.prototype.spawn_snake = function(position) {
-    this.snake = new Snake(position, DIRECTION.RIGHT);
-}
 
 SnakeBoard.prototype.spawn_food = function() {
     do {
-        this.food = new Coord(parseInt(random(0, this._size.x), 10),
-                              parseInt(random(0, this._size.y), 10));
-    } while(this.snake.at_position(this.food));
-    
+        this.food = new Coord(random(0, this._size.x), random(0, this._size.y));
+    } while(this.snakes.length && this.snakes.some(function(snake) { return snake.at_position(this.food)}, this));
 }
 
-SnakeBoard.prototype.end = function() {
-    this.snake.parts = [new Coord(this._size.x / 2, this._size.y / 2)];    
+SnakeBoard.prototype.spawn_snake = function() {
+    var coord;
+    do {
+        coord = new Coord(random(0, this._size.x), random(0, this._size.y));
+    } while(this.snakes.length && this.snakes.some(function(snake) { return snake.at_position(this.food)}, this));
+    this.snakes.push(new Snake(coord));
+    return this.snakes.length - 1;
+}
+
+SnakeBoard.prototype.remove_snake = function(id) {
+    this.snakes[id] = this.snakes[this.snakes.length];
+    this.snakes.pop();
+};
+
+SnakeBoard.prototype.end = function(which) {
+    this.snakes[which].parts = [new Coord(this._size.x / 2, this._size.y / 2)];
 }
 
 SnakeBoard.prototype.update = function() {
-    this.snake.update();
-    var head = this.snake.head();
-    if (coord_eq(head, this.food)) {
-        this.snake.grow();
-        this.spawn_food();
-    } else if (this.snake.at_tail(head)) {
-        this.end();
-    }
+    this.snakes.forEach(function(snake, idx) {
+        snake.update();
 
-    if (head.x < 0 || head.y < 0 || head.x >= this._size.x || head.y >= this._size.y) {
-        this.end();
-    }
+        var head = snake.head();
+        if (this.food !== null && coord_eq(head, this.food)) {
+            snake.grow();
+            this.spawn_food();
+        } else if (snake.at_tail(head)) {
+            this.end(idx);
+        }
+
+        if (head.x < 0 || head.y < 0 || head.x >= this._size.x || head.y >= this._size.y) {
+            this.end(idx);
+        }
+    }, this);
+
+
+
+    
 }
 
 
@@ -163,6 +188,7 @@ if(typeof window !== 'undefined'){
     
 } else {
     module.exports = {
+        GAME_SIZE: GAME_SIZE,
         Coord: Coord,
         DIRECTION: DIRECTION,
         random: random,

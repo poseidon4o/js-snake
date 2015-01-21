@@ -7,8 +7,7 @@
     <script src="https://cdn.socket.io/socket.io-1.3.0.js"></script>
     
     <script type="text/javascript">
-    var game = null, FPS = 60, TURN_TIME = 75,
-        update_clock = null, draw_clock = null;
+    var game = null, FPS = 60, draw_clock = null, my_id = null;
 
     window.requestAnimFrame = (function(){
         return  window.requestAnimationFrame       ||
@@ -31,17 +30,18 @@
 
     function animation () {
         draw_clock = requestAnimationFrame(animation);
-        game.draw();
+        game.draw(my_id);
     }
     
     function init () {
-        game = new DrawSystem('draw-field', new Coord(50, 50));
+        game = new DrawSystem('draw-field', new Coord(GAME_SIZE[0], GAME_SIZE[1]));
         animation();
 
         var socket = io.connect('http://localhost:8090/');
 
         socket.on('update', function (data) {
-            game.board.from_json(data.game);
+            my_id = data.id;
+            game.board = snake_board_from_json(data.game);
         });
 
         window.onkeydown = function(e) {
