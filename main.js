@@ -44,7 +44,7 @@ io.on('connection', function (socket) {
     };
 
     socket.on('register', function(data) {
-        if (data.name.length < 1) {
+        if (data.name === undefined || data.name.length < 1) {
             socket.emit('dc', 'name too short');
             socket.disconnect();
             return;
