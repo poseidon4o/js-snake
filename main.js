@@ -43,6 +43,8 @@ io.on('connection', function (socket) {
         name: ''
     };
 
+    console.log('Client connected ' + socket.conn.remoteAddress);
+
     socket.on('register', function(data) {
         if (data.name === undefined || data.name.length < 1) {
             socket.emit('dc', 'name too short');
@@ -80,7 +82,8 @@ io.on('connection', function (socket) {
         if (clients[me.id] === undefined) {
             return;
         }
-
+        
+        console.log('Client disconnected ' + socket.conn.remoteAddress);
 
         COLORS.push(clients[me.id].color);
 
